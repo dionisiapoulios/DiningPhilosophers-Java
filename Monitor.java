@@ -11,6 +11,15 @@ public class Monitor
 	 * Data members
 	 * ------------
 	 */
+	protected int numChopsticks;
+	String eating="EATING";
+	String hungry="HUNGRY";
+	String thinking="THINKING";
+	String talking="TALKING";
+	String[] statePhilosopher =null;
+	int nbPhilosophers;
+	String[] stateChopstick = null;
+
 
 
 	/**
@@ -18,7 +27,16 @@ public class Monitor
 	 */
 	public Monitor(int piNumberOfPhilosophers)
 	{
+
 		// TODO: set appropriate number of chopsticks based on the # of philosophers
+
+		nbPhilosophers = piNumberOfPhilosophers;
+		numChopsticks = piNumberOfPhilosophers;
+		statePhilosopher = new String[piNumberOfPhilosophers];
+		stateChopstick = new String[numChopsticks];
+
+
+
 	}
 
 	/*
@@ -33,7 +51,34 @@ public class Monitor
 	 */
 	public synchronized void pickUp(final int piTID)
 	{
-		// ...
+		statePhilosopher[piTID] = hungry;
+		//check if both neighbours are NOT eating
+		while(statePhilosopher[piTID]!=eating) {
+			if (statePhilosopher[(piTID - 1) % nbPhilosophers] != eating && statePhilosopher[(piTID + 1) % nbPhilosophers] != eating && statePhilosopher[piTID]==hungry) {
+				//start picking up the available chopsticks
+				if (piTID % 2 == 0) {
+					//pick up left then right
+					statePhilosopher[piTID] = eating;
+				} else {
+					//pick up right then left
+					statePhilosopher[piTID] = eating;
+				}
+
+				notifyAll();
+
+
+			} else {
+				//wait until both neighbours are done eating
+				try {
+					wait();
+				} catch (InterruptedException e) {
+					System.err.println("Monitor.pickUp():");
+					DiningPhilosophers.reportException(e);
+					System.exit(1);
+				}
+			}
+		}
+
 	}
 
 	/**

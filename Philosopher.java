@@ -1,4 +1,5 @@
 import common.BaseThread;
+import java.util.Random;
 
 import java.sql.SQLOutput;
 
@@ -121,11 +122,13 @@ public class Philosopher extends BaseThread
 			 * A decision is made at random whether this particular
 			 * philosopher is about to say something terribly useful.
 			 */
-			if(true == false)
+			Random rand = new Random();
+			int useful = rand.nextInt(20);
+			if(useful%2 == 0)
 			{
-				// Some monitor ops down here...
+				DiningPhilosophers.soMonitor.requestTalk();
 				talk();
-				// ...
+				DiningPhilosophers.soMonitor.endTalk();
 			}
 
 			Thread.yield();
