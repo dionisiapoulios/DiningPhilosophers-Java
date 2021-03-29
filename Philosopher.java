@@ -1,5 +1,7 @@
 import common.BaseThread;
 
+import java.sql.SQLOutput;
+
 /**
  * Class Philosopher.
  * Outlines main subrutines of our virtual philosopher.
@@ -25,9 +27,16 @@ public class Philosopher extends BaseThread
 	{
 		try
 		{
-			// ...
+			//PRINTING THAT A PHILOSOPHER STARTED EATING
+			System.out.println("Philosopher "+iTID+" has started eating.");
+			//YIELD
+			Thread.yield();
+			//sleep for a random interval
 			sleep((long)(Math.random() * TIME_TO_WASTE));
-			// ...
+			//YIELD
+			Thread.yield();
+			//PRINTING THAT A PHILOSOPHER IS DONE EATING
+			System.out.println("Philosopher "+iTID+" has finished eating");
 		}
 		catch(InterruptedException e)
 		{
@@ -47,7 +56,26 @@ public class Philosopher extends BaseThread
 	 */
 	public void think()
 	{
-		// ...
+		try {
+			//PRINTING THAT A PHILOSOPHER STARTED THINKING
+			System.out.println("Philosopher " + iTID + " has started thinking.");
+			//YIELD
+			Thread.yield();
+			//SLEEP FOR A RANDOM INTERVAL
+			sleep((long) (Math.random() * TIME_TO_WASTE));
+			//YIELD
+			Thread.yield();
+			//PRINTING THAT A PHILOSOPHER STOPPED THINKING
+			System.out.println("Philosopher " + iTID + " has stopped thinking.");
+		}
+		catch(InterruptedException e){
+			System.err.println("Philosopher.think():");
+			DiningPhilosophers.reportException(e);
+			System.exit(1);
+
+			}
+
+
 	}
 
 	/**
@@ -60,11 +88,17 @@ public class Philosopher extends BaseThread
 	 */
 	public void talk()
 	{
-		// ...
-
+		//PRINTING THAT A PHILOSOPHER HAS STARTED TALKING
+		System.out.println("Philosopher " + iTID + " has started talking.");
+		//YIELD
+		Thread.yield();
+		//say something at random
 		saySomething();
+		//YIELD
+		Thread.yield();
+		//PRINTING THAT A PHILOSOPHER HAS FINISHED TALKING
+		System.out.println("Philosopher " + iTID + " has finished talking.");
 
-		// ...
 	}
 
 	/**
@@ -94,7 +128,7 @@ public class Philosopher extends BaseThread
 				// ...
 			}
 
-			yield();
+			Thread.yield();
 		}
 	} // run()
 
