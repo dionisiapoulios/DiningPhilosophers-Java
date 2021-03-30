@@ -109,11 +109,11 @@ public class Philosopher extends BaseThread
 	{
 		for(int i = 0; i < DiningPhilosophers.DINING_STEPS; i++)
 		{
-			DiningPhilosophers.soMonitor.pickUp(getTID());
+			DiningPhilosophers.soMonitor.pickUp(getTID() -1);
 
 			eat();
 
-			DiningPhilosophers.soMonitor.putDown(getTID());
+			DiningPhilosophers.soMonitor.putDown(getTID()-1);
 
 			think();
 
@@ -126,9 +126,9 @@ public class Philosopher extends BaseThread
 			int useful = rand.nextInt(20);
 			if(useful%2 == 0)
 			{
-				DiningPhilosophers.soMonitor.requestTalk();
+				DiningPhilosophers.soMonitor.requestTalk(getTID()-1);
 				talk();
-				DiningPhilosophers.soMonitor.endTalk();
+				DiningPhilosophers.soMonitor.endTalk(getTID()-1);
 			}
 
 			Thread.yield();

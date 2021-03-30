@@ -1,3 +1,6 @@
+import java.util.LinkedList;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * Class Monitor
  * To synchronize dining philosophers.
@@ -18,10 +21,8 @@ public class Monitor
 	String talking="TALKING";
 	String[] statePhilosopher =null;
 	int nbPhilosophers;
-	String[] stateChopstick = null;
-
-
-
+	ReentrantLock[] chopstickArray = null;
+	ReentrantLock personTalking = null;
 	/**
 	 * Constructor
 	 */
@@ -31,10 +32,13 @@ public class Monitor
 		// TODO: set appropriate number of chopsticks based on the # of philosophers
 
 		nbPhilosophers = piNumberOfPhilosophers;
-		numChopsticks = piNumberOfPhilosophers;
-		statePhilosopher = new String[piNumberOfPhilosophers];
-		stateChopstick = new String[numChopsticks];
-
+		numChopsticks = nbPhilosophers;
+		statePhilosopher = new String[nbPhilosophers];
+		chopstickArray = new ReentrantLock[numChopsticks];
+		personTalking = new ReentrantLock(true);
+		for(int i=0;i< numChopsticks;i++){
+			chopstickArray[i] = new ReentrantLock(true);
+		}
 
 
 	}
@@ -52,16 +56,23 @@ public class Monitor
 	public synchronized void pickUp(final int piTID)
 	{
 		statePhilosopher[piTID] = hungry;
-		//check if both neighbours are NOT eating
-		while(statePhilosopher[piTID]!=eating) {
-			if (statePhilosopher[(piTID - 1) % nbPhilosophers] != eating && statePhilosopher[(piTID + 1) % nbPhilosophers] != eating && statePhilosopher[piTID]==hungry) {
+		// Stays in loop while he doesnt have both chopsticks
+		while(!statePhilosopher[piTID].equals(eating)) {
+			//check if both neighbours are NOT eating
+			if (statePhilosopher[(piTID - 1 + nbPhilosophers)  % nbPhilosophers] != eating && statePhilosopher[(piTID + 1 + nbPhilosophers ) % nbPhilosophers] != eating && statePhilosopher[piTID]==hungry) {
 				//start picking up the available chopsticks
+				statePhilosopher[piTID] = eating;
+				// If pair
 				if (piTID % 2 == 0) {
 					//pick up left then right
-					statePhilosopher[piTID] = eating;
-				} else {
+					chopstickArray[piTID].lock();
+					chopstickArray[(piTID+1 + nbPhilosophers)% nbPhilosophers ].lock();
+
+
+				} else { //if odd
 					//pick up right then left
-					statePhilosopher[piTID] = eating;
+					chopstickArray[(piTID+1 + nbPhilosophers)% nbPhilosophers ].lock();
+					chopstickArray[piTID].lock();
 				}
 
 				notifyAll();
@@ -88,24 +99,44 @@ public class Monitor
 	public synchronized void putDown(final int piTID)
 	{
 		// ...
+		if (piTID  % 2 == 0) {
+			//put down right then left
+			chopstickArray[(piTID+1 + nbPhilosophers)% nbPhilosophers ].unlock();
+			chopstickArray[piTID].unlock();
+
+
+
+		} else { //if odd
+			//put down left then right
+			chopstickArray[piTID].unlock();
+			chopstickArray[(piTID+1 + nbPhilosophers)% nbPhilosophers ].unlock();
+
+		}
+		statePhilosopher[piTID] = thinking;
+
+		notifyAll();
 	}
 
 	/**
 	 * Only one philopher at a time is allowed to philosophy
 	 * (while she is not eating).
 	 */
-	public synchronized void requestTalk()
+	public synchronized void requestTalk(int piTID)
 	{
-		// ...
+		personTalking.lock();
+		statePhilosopher[piTID] = talking;
 	}
 
 	/**
 	 * When one philosopher is done talking stuff, others
 	 * can feel free to start talking.
 	 */
-	public synchronized void endTalk()
+	public synchronized void endTalk(int piTID)
 	{
-		// ...
+		statePhilosopher[piTID] = thinking;
+		personTalking.unlock();
+
+		notifyAll();
 	}
 }
 
